@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>XUPERMULTI-TV</title>
+    <style>
+        :root{--bg:#0d0d0d;--card:#1e1e1e;--control:#252525;--border:#444;--text:#eee;--red:#ff3333;--blue:#3399ff;--green:#00cc99;--radius:12px}
+        body{margin:0;padding:20px;background:var(--bg);color:var(--text);font-family:'Segoe UI',sans-serif;display:flex;flex-direction:column;align-items:center;min-height:100vh;overflow-x:hidden}
+        .header{display:flex;align-items:center;gap:15px;margin-bottom:25px}
+        .header img{width:60px;height:60px;border-radius:50%;box-shadow:0 0 15px var(--green)}
+        h1{margin:0;font-size:1.5em;background:linear-gradient(90deg,#fff,var(--green));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+        .container{width:100%;max-width:1400px;display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:20px;margin-bottom:30px}
+        .video-container{background:var(--card);border-radius:var(--radius);overflow:hidden;box-shadow:0 8px 25px rgba(0,0,0,0.6);transition:.2s}
+        .video-container:hover{transform:translateY(-6px)}
+        .video-wrapper{position:relative;padding-bottom:56.25%;background:#000}
+        .main-iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+        .controls{padding:12px;background:var(--control);display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+        select,input{padding:9px 12px;background:#333;color:var(--text);border:1px solid var(--border);border-radius:8px;font-size:14px}
+        select{flex:1;min-width:180px}
+        input[type=number]{width:100px;display:none}
+        .btn{width:40px;height:40px;border-radius:10px;border:2px solid;cursor:pointer;display:grid;place-items:center;font-weight:bold;font-size:18px;transition:.2s}
+        .btn-pip{background:#112233;color:var(--blue);border-color:var(--blue)}
+        .btn-delete{background:#300;color:var(--red);border-color:var(--red)}
+        .btn:hover{transform:scale(1.1)}
+        .add-btn{padding:14px 40px;font-size:18px;background:linear-gradient(45deg,#0066cc,var(--green));color:#fff;border:none;border-radius:50px;cursor:pointer;box-shadow:0 6px 20px rgba(0,0,0,0.5);transition:.3s}
+        .add-btn:hover{transform:translateY(-3px);box-shadow:0 12px 30px rgba(0,204,153,.4)}
+        .pip-window{position:fixed;bottom:30px;right:30px;width:360px;height:203px;background:#000;border:3px solid var(--blue);border-radius:var(--radius);box-shadow:0 10px 30px #000c;z-index:9999;overflow:hidden;resize:both;display:none}
+        .pip-header{position:absolute;top:0;inset-inline:0;height:32px;background:#000c;backdrop-filter:blur(6px);display:flex;justify-content:flex-end;align-items:center;padding:0 10px;cursor:move}
+        .pip-close{width:24px;height:24px;background:var(--red);color:#fff;border:none;border-radius:50%;font-size:16px;cursor:pointer}
+        @media(max-width:768px){.container{grid-template-columns:1fr}.pip-window{width:280px;height:158px;bottom:20px;right:20px}}
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <img src="https://i.imgur.com/7qXbO8s.png" alt="Logo">
+    <h1>XUPERMULTI-TV + VPN</h1>
+</div>
+
+<div class="container" id="videoContainer"></div>
+<button class="add-btn" id="addBtn">Añadir Reproductor</button>
+
+<div class="pip-window" id="pipWindow">
+    <div class="pip-header" id="pipHeader">
+        <button class="pip-close" id="pipClose">X</button>
+    </div>
+    <iframe class="pip-iframe" id="pipIframe" allowfullscreen></iframe>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const container = document.getElementById('videoContainer');
+    const addBtn = document.getElementById('addBtn');
+    const pipWindow = document.getElementById('pipWindow');
+    const pipIframe = document.getElementById('pipIframe');
+    let currentPip = null;
+    let dragging = false, ox, oy;
+
+    const canales = [
+        {num:531,name:"Antena 3 HD"},{num:532,name:"Telecinco HD"},{num:533,name:"La 1 HD"},{num:534,name:"la Sexta HD"},{num:535,name:"Cuatro HD"},
+        {num:537,name:"DAZN F1"},{num:538,name:"DAZN LaLiga"},{num:539,name:"DAZN 1"},{num:540,name:"DAZN 2"},{num:541,name:"DAZN 3"},{num:542,name:"DAZN 4"},
+        {num:543,name:"Eurosport 1"},{num:544,name:"Eurosport 2"},{num:545,name:"Gol Play"},{num:546,name:"#Vamos"},
+        {num:547,name:"M. Deportes 1"},{num:548,name:"M. Deportes 2"},
+        {num:549,name:"Real Madrid TV"},{num:550,name:"Barça TV"},
+        {num:601,name:"M+ LC 1"},{num:602,name:"M+ LC 2"},{num:603,name:"M+ LC 3"},{num:604,name:"M+ LC 4"},{num:605,name:"M+ LC 5"},{num:606,name:"M+ LC 6"},
+        {num:610,name:"M+ Deportes"},{num:611,name:"M+ Deportes 2"},
+        // TUS FIJOS QUE SÍ FUNCIONAN
+        {num:"fijo-la1", name:"La 1 (tutvlive)", fixedUrl:"https://tutvlive.xyz/tvtodo/tv-la-1-es.php"},
+        {num:"fijo-hd6", name:"HD6 (sportzonline)", fixedUrl:"https://sportzonline.st/channels/hd/hd6.php"},
+        {num:"fijo-dabac29", name:"Dabac ID29", fixedUrl:"https://dabac.link/ch?id=29"},
+        {num:"fijo-azteca7", name:"Azteca7 (la14hd)", fixedUrl:"https://la14hd.com/vivo/canales.php?stream=azteca7"}
+    ];
+
+    const servidores = [
+        {id:"miztv", name:"Servidor-1",      url:"https://miztv.top/total/stream-{id}.php"},
+        {id:"tvc",   name:"Servidor-2", url:"https://tvcstreams.pl/player/tvfhd.php?sTL1?id={id}"},
+        {id:"dlhd",  name:"Servidor-3",       url:"https://dlhd.dad/stream/stream-{id}.php"}
+    ];
+
+    // PIP
+    document.getElementById('pipHeader').onmousedown = e=>{dragging=true;const r=pipWindow.getBoundingClientRect();ox=e.clientX-r.left;oy=e.clientY-r.top;e.preventDefault();}
+    document.onmousemove = e=>{if(dragging){pipWindow.style.left=(e.clientX-ox)+"px";pipWindow.style.top=(e.clientY-oy)+"px";pipWindow.style.right="auto";pipWindow.style.bottom="auto";}}
+    document.onmouseup = ()=>dragging=false;
+    document.getElementById('pipClose').onclick = ()=>{pipWindow.style.display='none';pipIframe.src='';currentPip=null;};
+
+    async function togglePip(p){
+        const f=p.querySelector('.main-iframe');
+        if(document.pictureInPictureEnabled && f.requestPictureInPicture){
+            try{document.pictureInPictureElement?document.exitPictureInPicture():f.requestPictureInPicture();return;}catch(e){}
+        }
+        if(currentPip===p){pipWindow.style.display='none';pipIframe.src='';currentPip=null;}
+        else{pipIframe.src=f.src;pipWindow.style.display='block';currentPip=p;}
+    }
+
+    function crearReproductor(){
+        const player=document.createElement('div');player.className='video-container';
+        const wrap=document.createElement('div');wrap.className='video-wrapper';
+        const ctrl=document.createElement('div');ctrl.className='controls';
+
+        const selCanal=document.createElement('select');
+        const ph=document.createElement('option');ph.disabled=ph.selected=true;ph.textContent="Elige canal";selCanal.appendChild(ph);
+        canales.forEach(c=>{
+            const o=document.createElement('option');
+            o.value=c.num;
+            o.textContent=(c.fixedUrl?"★ ":"")+c.name;
+            selCanal.appendChild(o);
+        });
+        const man=document.createElement('option');man.value="manual";man.textContent="Número manual...";selCanal.appendChild(man);
+
+        const selServ=document.createElement('select');
+        servidores.forEach(s=>{
+            const o=document.createElement('option');o.value=s.id;o.textContent=s.name;
+            selServ.appendChild(o);
+        });
+
+        const input=document.createElement('input');input.type="number";input.placeholder="Nº";input.style.display="none";
+
+        const btnPip=document.createElement('button');btnPip.className='btn btn-pip';btnPip.textContent='PiP';btnPip.onclick=()=>togglePip(player);
+        const btnDel=document.createElement('button');btnDel.className='btn btn-delete';btnDel.textContent='X';
+        btnDel.onclick=()=>{if(container.children.length>1){if(currentPip===player){pipWindow.style.display='none';currentPip=null;}player.remove();}else alert("Mínimo 1 reproductor");};
+
+        const iframe=document.createElement('iframe');iframe.className='main-iframe';iframe.allowFullscreen=true;iframe.allow="picture-in-picture";
+
+        function cargar(){
+            const val=selCanal.value;
+            const canalObj=canales.find(c=>c.num===val);
+            if(canalObj && canalObj.fixedUrl){
+                iframe.src=canalObj.fixedUrl;
+                selServ.style.display="none";
+            }else if(val==="manual"){
+                const num=input.value.trim()||537;
+                const srv=servidores.find(s=>s.id===selServ.value)||servidores[0];
+                iframe.src=srv.url.replace("{id}",num);
+                selServ.style.display="block";
+            }else{
+                const srv=servidores.find(s=>s.id===selServ.value)||servidores[0];
+                iframe.src=srv.url.replace("{id}",val);
+                selServ.style.display="block";
+            }
+            if(currentPip===player) pipIframe.src=iframe.src;
+        }
+
+        // Aquí está la clave: onchange en los dos selectores
+        selCanal.onchange = selServ.onchange = cargar;
+
+        selCanal.onclick = () => {
+            if(selCanal.value==="manual"){
+                selCanal.style.display="none";
+                input.style.display="block";
+                input.focus();
+            }
+        };
+        input.onkeyup = e => {if(e.key==="Enter" && input.value){cargar();selCanal.style.display="block";input.style.display="none";}};
+        input.onblur = () => {if(input.value){cargar();} selCanal.style.display="block";input.style.display="none";};
+
+        // Carga inicial
+        selCanal.value=537;
+        cargar();
+
+        ctrl.append(selCanal, input, selServ, btnPip, btnDel);
+        wrap.appendChild(iframe);
+        player.append(wrap, ctrl);
+        return player;
+    }
+
+    container.appendChild(crearReproductor());
+    addBtn.onclick = () => container.appendChild(crearReproductor());
+});
+</script>
+</body>
+</html>
