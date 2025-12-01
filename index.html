@@ -58,18 +58,20 @@ document.addEventListener('DOMContentLoaded', () => {
     let dragging = false, ox, oy;
 
     const canales = [
+        
+        {num:537,name:"DAZN F1"},{num:538,name:"DAZN LaLiga"},{num:445,name:"DAZN 1"},{num:446,name:"DAZN 2"},{num:447,name:"DAZN 3"},{num:448,name:"DAZN 4"},
+        {num:524,name:"Eurosport 1"},{num:525,name:"Eurosport 2"},{num:530,name:"Gol Play"},{num:546,name:"#Vamos"},
+        {num:436,name:"M. Deportes 1"},{num:438,name:"M. Deportes 2"},{num:526,name:"M. Deportes 3"},{num:527,name:"M. Deportes 4"},
+        {num:437,name:"M+ Super Copa"},{num:84,name:"M La Liga"},
+        {num:523,name:"Real Madrid TV"},{num:522,name:"Barça TV"},
         {num:531,name:"Antena 3 HD"},{num:532,name:"Telecinco HD"},{num:533,name:"La 1 HD"},{num:534,name:"la Sexta HD"},{num:535,name:"Cuatro HD"},
-        {num:537,name:"DAZN F1"},{num:538,name:"DAZN LaLiga"},{num:539,name:"DAZN 1"},{num:540,name:"DAZN 2"},{num:541,name:"DAZN 3"},{num:542,name:"DAZN 4"},
-        {num:543,name:"Eurosport 1"},{num:544,name:"Eurosport 2"},{num:545,name:"Gol Play"},{num:546,name:"#Vamos"},
-        {num:547,name:"M. Deportes 1"},{num:548,name:"M. Deportes 2"},
-        {num:549,name:"Real Madrid TV"},{num:550,name:"Barça TV"},
-        {num:601,name:"M+ LC 1"},{num:602,name:"M+ LC 2"},{num:603,name:"M+ LC 3"},{num:604,name:"M+ LC 4"},{num:605,name:"M+ LC 5"},{num:606,name:"M+ LC 6"},
-        {num:610,name:"M+ Deportes"},{num:611,name:"M+ Deportes 2"},
         // TUS FIJOS QUE SÍ FUNCIONAN
-        {num:"fijo-la1", name:"La 1 (tutvlive)", fixedUrl:"https://tutvlive.xyz/tvtodo/tv-la-1-es.php "},
-        {num:"fijo-hd6", name:"HD6 (sportzonline)", fixedUrl:"https://sportzonline.st/channels/hd/hd6.php "},
-        {num:"fijo-dabac29", name:"Dabac ID29", fixedUrl:"https://dabac.link/ch?id=29 "},
-        {num:"fijo-azteca7", name:"Azteca7 (la14hd)", fixedUrl:"https://la14hd.com/vivo/canales.php?stream=azteca7 "}
+        {num:"fijo-m. lig-camp", name:"M. Lig-Camp", fixedUrl:"https://tutvlive.xyz/tvtodo/mligacampeones.php "},
+        {num:"fijo-m. lig-camp 2", name:"M. Lig-Camp 2", fixedUrl:"https://tutvlive.xyz/tvtodo/mligacampeones2.php "},
+        {num:"fijo-m. lig-camp 3", name:"M. Lig-Camp 3", fixedUrl:"https://tutvlive.xyz/mligacampeones3.php "},
+        {num:"fijo-#vamos", name:"#Vamos", fixedUrl:"https://tutvlive.xyz/tvtodo/vamos.php "},
+        {num:"fijo-espn deportes", name:"Espn Deportes", fixedUrl:"https://sportzonline.st/channels/hd/hd6.php "},
+        {num:"fijo-azteca7", name:"Azteca7", fixedUrl:"https://la14hd.com/vivo/canales.php?stream=azteca7 "}
     ];
 
     const servidores = [
