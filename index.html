@@ -34,7 +34,7 @@
 <body>
 
 <div class="header">
-    <img src="https://i.postimg.cc/4xgKhgFx/logo11-30-172046.png" alt="Logo">
+    <img src="https://i.postimg.cc/4xgKhgFx/logo11-30-172046.png " alt="Logo">
     <h1>XUPERMULTI-TV + VPN</h1>
 </div>
 
@@ -66,99 +66,190 @@ document.addEventListener('DOMContentLoaded', () => {
         {num:601,name:"M+ LC 1"},{num:602,name:"M+ LC 2"},{num:603,name:"M+ LC 3"},{num:604,name:"M+ LC 4"},{num:605,name:"M+ LC 5"},{num:606,name:"M+ LC 6"},
         {num:610,name:"M+ Deportes"},{num:611,name:"M+ Deportes 2"},
         // TUS FIJOS QUE SÍ FUNCIONAN
-        {num:"fijo-la1", name:"La 1 (tutvlive)", fixedUrl:"https://tutvlive.xyz/tvtodo/tv-la-1-es.php"},
-        {num:"fijo-hd6", name:"HD6 (sportzonline)", fixedUrl:"https://sportzonline.st/channels/hd/hd6.php"},
-        {num:"fijo-dabac29", name:"Dabac ID29", fixedUrl:"https://dabac.link/ch?id=29"},
-        {num:"fijo-azteca7", name:"Azteca7 (la14hd)", fixedUrl:"https://la14hd.com/vivo/canales.php?stream=azteca7"}
+        {num:"fijo-la1", name:"La 1 (tutvlive)", fixedUrl:"https://tutvlive.xyz/tvtodo/tv-la-1-es.php "},
+        {num:"fijo-hd6", name:"HD6 (sportzonline)", fixedUrl:"https://sportzonline.st/channels/hd/hd6.php "},
+        {num:"fijo-dabac29", name:"Dabac ID29", fixedUrl:"https://dabac.link/ch?id=29 "},
+        {num:"fijo-azteca7", name:"Azteca7 (la14hd)", fixedUrl:"https://la14hd.com/vivo/canales.php?stream=azteca7 "}
     ];
 
     const servidores = [
         {id:"miztv", name:"Servidor-1", url:"https://miztv.top/total/stream-{id}.php"},
-        {id:"tvc",   name:"Servidor-2", url:"https://tvcstreams.pl/player/tvfhd.php?sTL1?id={id}"},
+        {id:"tvc", name:"Servidor-2", url:"https://tvcstreams.pl/player/tvfhd.php?sTL1?id={id}"},
         {id:"daddyhd", name:"Servidor-3", url:"https://daddyhd.com/stream/stream-{id}.php"}
     ];
 
     // PIP
-    document.getElementById('pipHeader').onmousedown = e=>{dragging=true;const r=pipWindow.getBoundingClientRect();ox=e.clientX-r.left;oy=e.clientY-r.top;e.preventDefault();}
-    document.onmousemove = e=>{if(dragging){pipWindow.style.left=(e.clientX-ox)+"px";pipWindow.style.top=(e.clientY-oy)+"px";pipWindow.style.right="auto";pipWindow.style.bottom="auto";}}
-    document.onmouseup = ()=>dragging=false;
-    document.getElementById('pipClose').onclick = ()=>{pipWindow.style.display='none';pipIframe.src='';currentPip=null;};
-
-    async function togglePip(p){
-        const f=p.querySelector('.main-iframe');
-        if(document.pictureInPictureEnabled && f.requestPictureInPicture){
-            try{document.pictureInPictureElement?document.exitPictureInPicture():f.requestPictureInPicture();return;}catch(e){}
+    document.getElementById('pipHeader').onmousedown = e => {
+        dragging = true;
+        const r = pipWindow.getBoundingClientRect();
+        ox = e.clientX - r.left;
+        oy = e.clientY - r.top;
+        e.preventDefault();
+    };
+    document.onmousemove = e => {
+        if (dragging) {
+            pipWindow.style.left = (e.clientX - ox) + "px";
+            pipWindow.style.top = (e.clientY - oy) + "px";
+            pipWindow.style.right = "auto";
+            pipWindow.style.bottom = "auto";
         }
-        if(currentPip===p){pipWindow.style.display='none';pipIframe.src='';currentPip=null;}
-        else{pipIframe.src=f.src;pipWindow.style.display='block';currentPip=p;}
+    };
+    document.onmouseup = () => dragging = false;
+    document.getElementById('pipClose').onclick = () => {
+        pipWindow.style.display = 'none';
+        pipIframe.src = '';
+        currentPip = null;
+    };
+
+    async function togglePip(p) {
+        const f = p.querySelector('.main-iframe');
+        if (document.pictureInPictureEnabled && f.requestPictureInPicture) {
+            try {
+                if (document.pictureInPictureElement) {
+                    await document.exitPictureInPicture();
+                } else {
+                    await f.requestPictureInPicture();
+                }
+                return;
+            } catch (e) {}
+        }
+        if (currentPip === p) {
+            pipWindow.style.display = 'none';
+            pipIframe.src = '';
+            currentPip = null;
+        } else {
+            pipIframe.src = f.src;
+            pipWindow.style.display = 'block';
+            currentPip = p;
+        }
     }
 
-    function crearReproductor(){
-        const player=document.createElement('div');player.className='video-container';
-        const wrap=document.createElement('div');wrap.className='video-wrapper';
-        const ctrl=document.createElement('div');ctrl.className='controls';
+    function crearReproductor() {
+        const player = document.createElement('div');
+        player.className = 'video-container';
+        const wrap = document.createElement('div');
+        wrap.className = 'video-wrapper';
+        const ctrl = document.createElement('div');
+        ctrl.className = 'controls';
 
-        const selCanal=document.createElement('select');
-        const ph=document.createElement('option');ph.disabled=ph.selected=true;ph.textContent="Elige canal";selCanal.appendChild(ph);
-        canales.forEach(c=>{
-            const o=document.createElement('option');
-            o.value=c.num;
-            o.textContent=(c.fixedUrl?"★ ":"")+c.name;
+        const selCanal = document.createElement('select');
+        const ph = document.createElement('option');
+        ph.disabled = ph.selected = true;
+        ph.textContent = "Elige canal";
+        selCanal.appendChild(ph);
+        canales.forEach(c => {
+            const o = document.createElement('option');
+            o.value = c.num;
+            o.textContent = (c.fixedUrl ? "★ " : "") + c.name;
             selCanal.appendChild(o);
         });
-        const man=document.createElement('option');man.value="manual";man.textContent="Número manual...";selCanal.appendChild(man);
+        const man = document.createElement('option');
+        man.value = "manual";
+        man.textContent = "Número manual...";
+        selCanal.appendChild(man);
 
-        const selServ=document.createElement('select');
-        servidores.forEach(s=>{
-            const o=document.createElement('option');o.value=s.id;o.textContent=s.name;
+        const selServ = document.createElement('select');
+        servidores.forEach(s => {
+            const o = document.createElement('option');
+            o.value = s.id;
+            o.textContent = s.name;
             selServ.appendChild(o);
         });
 
-        const input=document.createElement('input');input.type="number";input.placeholder="Nº";input.style.display="none";
+        const input = document.createElement('input');
+        input.type = "number";
+        input.placeholder = "Nº";
+        input.style.display = "none";
 
-        const btnPip=document.createElement('button');btnPip.className='btn btn-pip';btnPip.textContent='PiP';btnPip.onclick=()=>togglePip(player);
-        const btnDel=document.createElement('button');btnDel.className='btn btn-delete';btnDel.textContent='X';
-        btnDel.onclick=()=>{if(container.children.length>1){if(currentPip===player){pipWindow.style.display='none';currentPip=null;}player.remove();}else alert("Mínimo 1 reproductor");};
+        const btnCancel = document.createElement('button');
+        btnCancel.textContent = 'Cancelar';
+        btnCancel.style.display = 'none';
+        btnCancel.onclick = () => {
+            selCanal.style.display = 'block';
+            input.style.display = 'none';
+            btnCancel.style.display = 'none';
+            selCanal.value = 'manual';
+        };
 
-        const iframe=document.createElement('iframe');iframe.className='main-iframe';iframe.allowFullscreen=true;iframe.allow="picture-in-picture";
+        const btnPip = document.createElement('button');
+        btnPip.className = 'btn btn-pip';
+        btnPip.textContent = 'PiP';
+        btnPip.onclick = () => togglePip(player);
 
-        function cargar(){
-            const val=selCanal.value;
-            const canalObj=canales.find(c=>c.num===val);
-            if(canalObj && canalObj.fixedUrl){
-                iframe.src=canalObj.fixedUrl;
-                selServ.style.display="none";
-            }else if(val==="manual"){
-                const num=input.value.trim()||537;
-                const srv=servidores.find(s=>s.id===selServ.value)||servidores[0];
-                iframe.src=srv.url.replace("{id}",num);
-                selServ.style.display="block";
-            }else{
-                const srv=servidores.find(s=>s.id===selServ.value)||servidores[0];
-                iframe.src=srv.url.replace("{id}",val);
-                selServ.style.display="block";
-            }
-            if(currentPip===player) pipIframe.src=iframe.src;
-        }
-
-        // Aquí está la clave: onchange en los dos selectores
-        selCanal.onchange = selServ.onchange = cargar;
-
-        selCanal.onclick = () => {
-            if(selCanal.value==="manual"){
-                selCanal.style.display="none";
-                input.style.display="block";
-                input.focus();
+        const btnDel = document.createElement('button');
+        btnDel.className = 'btn btn-delete';
+        btnDel.textContent = 'X';
+        btnDel.onclick = () => {
+            if (container.children.length > 1) {
+                if (currentPip === player) {
+                    pipWindow.style.display = 'none';
+                    currentPip = null;
+                }
+                player.remove();
+            } else {
+                alert("Mínimo 1 reproductor");
             }
         };
-        input.onkeyup = e => {if(e.key==="Enter" && input.value){cargar();selCanal.style.display="block";input.style.display="none";}};
-        input.onblur = () => {if(input.value){cargar();} selCanal.style.display="block";input.style.display="none";};
 
-        // Carga inicial
-        selCanal.value=537;
+        const iframe = document.createElement('iframe');
+        iframe.className = 'main-iframe';
+        iframe.allowFullscreen = true;
+        iframe.allow = "picture-in-picture";
+
+        function cargar() {
+            const val = selCanal.value;
+            const canalObj = canales.find(c => c.num === val);
+            if (canalObj && canalObj.fixedUrl) {
+                iframe.src = canalObj.fixedUrl;
+                selServ.style.display = "none";
+            } else if (val === "manual") {
+                const num = input.value.trim() || 537;
+                const srv = servidores.find(s => s.id === selServ.value) || servidores[0];
+                iframe.src = srv.url.replace("{id}", num);
+                selServ.style.display = "block";
+            } else {
+                const srv = servidores.find(s => s.id === selServ.value) || servidores[0];
+                iframe.src = srv.url.replace("{id}", val);
+                selServ.style.display = "block";
+            }
+            if (currentPip === player) pipIframe.src = iframe.src;
+        }
+
+        selCanal.onchange = () => {
+            if (selCanal.value === "manual") {
+                selCanal.style.display = "none";
+                input.style.display = "block";
+                btnCancel.style.display = 'block';
+                input.focus();
+            } else {
+                selServ.style.display = "block";
+                cargar();
+            }
+        };
+        input.onkeyup = e => {
+            if (e.key === "Enter" && input.value) {
+                cargar();
+                selCanal.style.display = "block";
+                input.style.display = "none";
+                btnCancel.style.display = 'none';
+                selCanal.value = 'manual';
+            }
+        };
+        input.onblur = () => {
+            if (input.value) {
+                cargar();
+            }
+            selCanal.style.display = "block";
+            input.style.display = "none";
+            btnCancel.style.display = 'none';
+            selCanal.value = 'manual';
+        };
+        selServ.onchange = cargar; // Asegurar que el cambio de servidor actualiza la URL
+
+        selCanal.value = 537;
         cargar();
 
-        ctrl.append(selCanal, input, selServ, btnPip, btnDel);
+        ctrl.append(selCanal, input, selServ, btnPip, btnDel, btnCancel);
         wrap.appendChild(iframe);
         player.append(wrap, ctrl);
         return player;
